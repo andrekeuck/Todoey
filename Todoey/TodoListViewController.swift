@@ -10,10 +10,18 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
+    var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"] //create the array to hold the to-do items
+    
+    let defaults = UserDefaults.standard //create an entry point to the User Defaults iOS backend database which stores persistent data across loading sessions of the app
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] { //set an if statement to check/set a local variable "items" equal to the key value pairs for TodoListArray which is stored in the User Defaults database, and cast the values as strings
+            itemArray = items //copy the contents of "items" over to the ItemArray array for display on the screen
+        }
+        
         
     }
 
@@ -62,6 +70,11 @@ class TodoListViewController: UITableViewController {
             
             //what will happen once the user taps the Add Item button on our UIAlert
             self.itemArray.append(textField.text!) //add the entered text to the item array established at the top of the code
+            
+            self.defaults.set(self.itemArray, forKey: "TodoListArray") //save the newly updated itemArray to the User Defaults in a Key-Value Pair format
+            
+            
+            
             self.tableView.reloadData() //reload the tableview to display the updated array/data
         }
         
