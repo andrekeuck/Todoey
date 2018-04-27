@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    let itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
+    var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,17 +50,30 @@ class TodoListViewController: UITableViewController {
         
         tableView.deselectRow(at: indexPath, animated: true) //activates the gray highlight when the item is selected, but animates the de-selection immediately so the item is only highlighted during the tap/interaction
         
+    }
+    
+    //MARK: Add new items
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        var textField = UITextField() //define a variable that is global within the addButtonPressed IBAction that you're in
+        
+        let alert = UIAlertController(title: "Add new Todoey Item", message: "", preferredStyle: .alert) //create an alert pop-up with the specified title, message, and style
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in //set the title/label value for a button on the alert, choose its style, and define the action to take place once that button is tapped/pressed
+            
+            //what will happen once the user taps the Add Item button on our UIAlert
+            self.itemArray.append(textField.text!) //add the entered text to the item array established at the top of the code
+            self.tableView.reloadData() //reload the tableview to display the updated array/data
+        }
+        
+        alert.addTextField { (alertTextField) in //create a local variable called alertTextField to capture the entered item; the alertTextField variable here is local to the closure
+            alertTextField.placeholder = "Create new item" //set the placeholder text of the alertTextField box
+            textField = alertTextField //set the global variable established above to the value entered into the local/closure variable set above
+            
+        }
+        
+        alert.addAction(action) //add the action to the alert pop-up; i.e. insert the button and its corresponding action defined above into the alert pop-up defined above
+        present(alert, animated: true, completion: nil) //display the alert (now with action inserted) using animation, and define the block to execute after the presentation is completed
         
     }
     
-    
-    
-   
-    
-    
-    
-    
-    
-    
- 
 }
