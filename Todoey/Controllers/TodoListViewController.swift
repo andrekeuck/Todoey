@@ -11,36 +11,20 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
     var itemArray = [Item]() //create the array to hold the to-do items
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist") //set dataFilePath to use the native file manager to check a URL that specifies the document directory within the user's Library structure on their computer. Look in the "Items.plist" file by appending that filename to the end of the directory path, and then Grab the ".first" item since it's an array.
     
-    let defaults = UserDefaults.standard //create an entry point to the User Defaults singleton, which stores persistent data across loading sessions of the app
+//    let defaults = UserDefaults.standard //create an entry point to the User Defaults singleton, which stores persistent data across loading sessions of the app
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        let newItem = Item()
-        newItem.title = "Find Mike"
-        itemArray.append(newItem)
-
-        let newItem2 = Item()
-        newItem2.title = "Buy waffles."
-        itemArray.append(newItem2)
-
-        let newItem3 = Item()
-        newItem3.title = "Destroy monster."
-        itemArray.append(newItem3)
-        
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] { //set an if statement to check/set a local variable "items" equal to the key value pairs for TodoListArray which is stored in the User Defaults singleton, and cast the values as strings
-            itemArray = items //copy the contents of "items" over to the ItemArray array for display on the screen
-        }
-        
+        print(dataFilePath!) //show me the file path for the plist
+        loadItems() //call the load items function written below
         
     }
 
     //MARK - Tableview Datasource Methods
     
-    //2 methods
-
-    //how many rows we want in table view
     //TODO: Declare numberOfRowsInSection here:
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
@@ -67,7 +51,7 @@ class TodoListViewController: UITableViewController {
         
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done //reverse the (boolean) value of the .done property for a given item at indexPath.row
         
-        tableView.reloadData()
+        saveItems() //call function saveItems, defined below
         
         tableView.deselectRow(at: indexPath, animated: true) //activates the gray highlight when the item is selected, but animates the de-selection immediately so the item is only highlighted during the tap/interaction
         
@@ -83,15 +67,13 @@ class TodoListViewController: UITableViewController {
             
             //what will happen once the user taps the Add Item button on our UIAlert
 
-
-            let newItem = Item()
-            newItem.title = textField.text!
+            let newItem = Item() //create newItem of type Item (see Item.swift class)
+            newItem.title = textField.text! //set the title of the new Item instance to the text field entered by the user
             
             self.itemArray.append(newItem) //add the entered text to the item array established at the top of the code
+
+            self.saveItems() //save the item according to the saveItems function defined below
             
-            self.defaults.set(self.itemArray, forKey: "TodoListArray") //save the newly updated itemArray to the User Defaults in a Key-Value Pair format
-            
-            self.tableView.reloadData() //reload the tableview to display the updated array/data
         }
         
         alert.addTextField { (alertTextField) in //create a local variable called alertTextField to capture the entered item; the alertTextField variable here is local to the closure
@@ -105,4 +87,29 @@ class TodoListViewController: UITableViewController {
         
     }
     
+    func saveItems() { //function to write/save items to the plist
+        let encoder = PropertyListEncoder() //set constant encoder to the P(roperty)ListEncoder
+        
+        do {
+            let data = try encoder.encode(itemArray) //pass contents of itemArray to the encoder for encoding
+            try data.write(to: dataFilePath!) //try to write the data to the destination file path specified above
+        } catch {
+            print("error encoding itemArray, \(error)") //show any errors
+        }
+        self.tableView.reloadData() //reload the tableview to display the updated array/data
+
+    }
+    
+    func loadItems() { //function to load items that've been written to the plist
+        if let data = try? Data(contentsOf: dataFilePath!) { //fetch the content from the P(roperty)List at the destination file path
+            let decoder = PropertyListDecoder() //decode the content
+            do {
+                itemArray = try decoder.decode([Item].self, from: data) //for each array item, decode and present the properties
+            } catch {
+                print("Error decoding item array, \(error)") //show errors
+        }
+    }
+    
+    
+}
 }

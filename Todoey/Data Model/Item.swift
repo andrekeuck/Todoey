@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Item {
-    var title : String = ""
-    var done : Bool = false
+class Item: Codable { //create a class called Item that is encodable/decodable ("codable") into JSON (ALL properties must be of standard data types)
+    var title : String = "" //titles are empty by default
+    var done : Bool = false //items are not done by default
 }
